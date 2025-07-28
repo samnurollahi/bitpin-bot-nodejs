@@ -22,7 +22,6 @@ class Bot {
             // Authorization: `Token ${token}`,
             },
         });
-        // interface
     }
     // get all name currencies
     getCurrencies() {
@@ -76,15 +75,54 @@ class Bot {
     // currencie
     getCurrencie() {
         return __awaiter(this, arguments, void 0, function* (config = {
-            symbol: false,
+            currency: false,
             name: false,
             price: false,
-            tradable: false,
+            to: false,
         }) {
+            const result = yield this._client.get("https://api.bitpin.org/api/v1/mkt/tickers/");
+            let data = result.data;
+            if (result.status != 200) {
+                return [
+                    {
+                        status: result.status,
+                    },
+                ];
+            }
+            if (config.to) {
+                data = data.filter(item => {
+                    return item.symbol.split("_")[1] == config.to ? item : false;
+                });
+            }
+            if (config.currency) {
+                data = data.filter((item) => {
+                    return item.symbol.split("_")[0] == config.currency ? item : false;
+                });
+            }
+            else if (config.name) {
+                const target = yield this.getCurrencies({
+                    name: config.name,
+                });
+                data = data.filter((item) => {
+                    return item.symbol.split("_")[0] == target[0].currency ? item : false;
+                });
+            }
+            if (config.price) {
+                data = data.filter(item => {
+                    var _a;
+                    let price = (_a = config.price) !== null && _a !== void 0 ? _a : 0;
+                    return item.price > price ? item : false;
+                });
+            }
+            return data;
         });
     }
 }
 exports.Bot = Bot;
-// const rastin = new Bot("6592f92ea8fe12320a2fb29d39cd9944dd08b465");
-// rastin.getCurrencies();
+const rastin = new Bot("6592f92ea8fe12320a2fb29d39cd9944dd08b465");
+// rastin.getCurrencie({
+// name: "Bitcoin",
+// price: 1045255000
+// to: "IRT"
+// });
 // 6592f92ea8fe12320a2fb29d39cd9944dd08b465
