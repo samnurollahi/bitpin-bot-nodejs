@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export class Bot {
+export default class Bot {
   private _client;
 
   constructor(public readonly token: string) {
@@ -10,6 +10,7 @@ export class Bot {
       },
     });
   }
+
 
   // get all name currencies
   async getCurrencies(
@@ -34,11 +35,7 @@ export class Bot {
 
     // check status code
     if (result.status != 200) {
-      return [
-        {
-          status: result.status,
-        },
-      ];
+      console.log(result.status);
     }
 
     if (config.sort == "desc") {
@@ -92,11 +89,7 @@ export class Bot {
     let data: any[] = result.data;
 
     if (result.status != 200) {
-      return [
-        {
-          status: result.status,
-        },
-      ];
+      console.log(result.status);
     }
 
     if(config.to) {
@@ -126,11 +119,44 @@ export class Bot {
 
     return data
   }
+
+  webSocketTo(config: {
+    currency?: string | false;
+    to?: "IRT" | "USDT" | false;
+  } = {
+    currency: false,
+    to: false
+  }, callback: (data: any[], close: () => void) => void) {
+    const socket = new WebSocket("wss://ws.bitpin.ir")
+    const close = (): void => {
+      socket.close()
+    }
+
+    socket.addEventListener("open", () => {
+      console.log("socket connected");
+    
+      socket.send(JSON.stringify({method: "sub_to_tickers"}))
+    })
+    socket.addEventListener("message", (e) => {
+      let data = JSON.parse(e.data)
+
+      if(!data.message) {
+        if(config.currency) {
+          data = data[`${config.currency.toLocaleUpperCase()}_${config.to || "IRT"}`]
+        }
+        
+        callback(data, close)
+      }
+    })
+  }
 }
 const rastin = new Bot("6592f92ea8fe12320a2fb29d39cd9944dd08b465");
-// rastin.getCurrencie({
-  // name: "Bitcoin",
-  // price: 1045255000
-  // to: "IRT"
-// });
-// 6592f92ea8fe12320a2fb29d39cd9944dd08b465
+rastin.webSocketTo({
+  currency: "SFM"
+}, (data, closer) => {
+  console.log(data);
+
+  setTimeout(() => {
+    closer()
+  }, 10000)
+})

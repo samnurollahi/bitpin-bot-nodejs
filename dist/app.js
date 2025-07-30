@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Bot = void 0;
 const axios_1 = __importDefault(require("axios"));
 class Bot {
     constructor(token) {
@@ -36,11 +35,7 @@ class Bot {
             let data = result.data;
             // check status code
             if (result.status != 200) {
-                return [
-                    {
-                        status: result.status,
-                    },
-                ];
+                console.log(result.status);
             }
             if (config.sort == "desc") {
                 data = data.reverse();
@@ -83,11 +78,7 @@ class Bot {
             const result = yield this._client.get("https://api.bitpin.org/api/v1/mkt/tickers/");
             let data = result.data;
             if (result.status != 200) {
-                return [
-                    {
-                        status: result.status,
-                    },
-                ];
+                console.log(result.status);
             }
             if (config.to) {
                 data = data.filter(item => {
@@ -118,11 +109,5 @@ class Bot {
         });
     }
 }
-exports.Bot = Bot;
+exports.default = Bot;
 const rastin = new Bot("6592f92ea8fe12320a2fb29d39cd9944dd08b465");
-// rastin.getCurrencie({
-// name: "Bitcoin",
-// price: 1045255000
-// to: "IRT"
-// });
-// 6592f92ea8fe12320a2fb29d39cd9944dd08b465
